@@ -1,6 +1,7 @@
 #!/usr/bin/python
  
 import sys
+from time import perf_counter as pc
 
 from PIL import Image
 import numpy as np
@@ -37,41 +38,57 @@ def calc_imagediffcoeff( bwimg_1, bwimg_2 ):
 
 
 
-files = sys.argv[1:]
+if __name__ == '__main__':
+
+    t0 = pc() # starting-time
+
+    files = sys.argv[1:]
 
 
-filedata = {}
-for fn in files:
-    filedata[fn] = fixedscalebwthumb(fn)
+    print("# Reading in files.")
+    filedata = {}
+    for fn in files:
+        filedata[fn] = fixedscalebwthumb(fn)
+
+    t1 = pc() # time after reading the files and creating the bw-imagedata of the thumbs
+
+    n = len(files)
+    resultmatrix = np.zeros((n,n), 'f') # does sparse-matrix-Array make sense?!
+
+    t2 = pc() # time after creating the result-array
+
+    print("# Comparing in files.")
+    for idx1, fn1 in enumerate(files):
+        for idx2, fn2 in enumerate(files):
+            if idx2 >= idx1:
+                continue # don't compare a file with itself; half matrix is sufficient
+            bw1 = filedata[fn1]
+            bw2 = filedata[fn2]
+
+            diffval = sum(abs(bw1 - bw2)) / len(bw1)
+            resultmatrix[idx1, idx2] = diffval
+
+    t3 = pc() # time after calculating the diff-value
+    #print(resultmatrix)
 
 
-n = len(files)
-resultmatrix = np.zeros((n,n), 'f')
+    print("# These files seem to have the same contents, but may differ in size:")
 
-for idx1, fn1 in enumerate(files):
-    for idx2, fn2 in enumerate(files):
-        if idx2 >= idx1:
-            continue # don't compare a file with itself; half matrix is sufficient
-        bw1 = filedata[fn1]
-        bw2 = filedata[fn2]
+    for idx1, fn1 in enumerate(files):
+        for idx2, fn2 in enumerate(files):
+            if idx2 >= idx1:
+                continue # don't compare a file with itself; half matrix is sufficient
 
-        diffval = sum(abs(bw1 - bw2)) / len(bw1)
-        resultmatrix[idx1, idx2] = diffval
-
-#print(resultmatrix)
+            diffval = resultmatrix[idx1, idx2]
+            if diffval < 10:
+                #print("{} / {} -> {}".format(fn1, fn2, diffval))
+                print("qiv -f {} / {} # -> {}".format(fn1, fn2, diffval))
 
 
-print("# These files seem to have the same contents, but may differ in size:")
+        
+    t4 = pc() # time after printing the results
 
-for idx1, fn1 in enumerate(files):
-    for idx2, fn2 in enumerate(files):
-        if idx2 >= idx1:
-            continue # don't compare a file with itself; half matrix is sufficient
-
-        diffval = resultmatrix[idx1, idx2]
-        if diffval < 10:
-            #print("{} / {} -> {}".format(fn1, fn2, diffval))
-            print("qiv -f {} / {} # -> {}".format(fn1, fn2, diffval))
-
-
-    
+print("t1 - t0", t1 - t0)
+print("t2 - t1", t2 - t1)
+print("t3 - t2", t3 - t2)
+print("t4 - t3", t4 - t3)
