@@ -45,8 +45,6 @@ for fn in files:
     filedata[fn] = fixedscalebwthumb(fn)
 
 
-
-print(files)
 n = len(files)
 resultmatrix = np.zeros((n,n), 'f')
 
@@ -62,6 +60,9 @@ for idx1, fn1 in enumerate(files):
 
 #print(resultmatrix)
 
+
+print("# These files seem to have the same contents, but may differ in size:")
+
 for idx1, fn1 in enumerate(files):
     for idx2, fn2 in enumerate(files):
         if idx2 >= idx1:
@@ -69,7 +70,8 @@ for idx1, fn1 in enumerate(files):
 
         diffval = resultmatrix[idx1, idx2]
         if diffval < 10:
-            print("{} / {} -> {}".format(fn1, fn2, diffval))
+            #print("{} / {} -> {}".format(fn1, fn2, diffval))
+            print("qiv -f {} / {} # -> {}".format(fn1, fn2, diffval))
 
 
     
