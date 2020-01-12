@@ -54,7 +54,7 @@ if __name__ == '__main__':
     print("# Reading in files.", file=outfile, flush=True)
     filedata = {}
     for fn in files:
-        filedata[fn] = fixedscalebwthumb(fn)
+        filedata[fn] = fixedscalebwthumb(fn) # filedata berechnen
 
     t1 = pc() # time after reading the files and creating the bw-imagedata of the thumbs
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     for idx1, fn1 in enumerate(files):
         for idx2, fn2 in enumerate(files):
             if idx2 >= idx1:
-                continue # don't compare a file with itself; half matrix is sufficient
+                continue # compare only below the diagonal
             bw1 = filedata[fn1]
             bw2 = filedata[fn2]
 
