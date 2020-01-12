@@ -100,7 +100,7 @@ print("# t2 - t1", t2 - t1, file=outfile)
 print("# t3 - t2", t3 - t2, file=outfile)
 print("# t4 - t3", t4 - t3, file=outfile)
 print("#", file=outfile)
-print("# t4 - t0", t4 - t3, file=outfile)
+print("# t4 - t0", t4 - t0, file=outfile)
 
 outfile.close()
 print("Result has been written to \"{}\"".format(outfilename))
