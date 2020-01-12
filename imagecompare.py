@@ -38,6 +38,10 @@ def calc_imagediffcoeff( bwimg_1, bwimg_2 ):
 
 
 
+# =============================================================================
+# =============================================================================
+# =============================================================================
+
 if __name__ == '__main__':
 
     t0 = pc() # starting-time
@@ -45,7 +49,9 @@ if __name__ == '__main__':
     files = sys.argv[1:]
 
 
-    print("# Reading in files.")
+    outfilename = "view-results.bash"
+    outfile = open(outfilename, "w")
+    print("# Reading in files.", file=outfile)
     filedata = {}
     for fn in files:
         filedata[fn] = fixedscalebwthumb(fn)
@@ -57,7 +63,7 @@ if __name__ == '__main__':
 
     t2 = pc() # time after creating the result-array
 
-    print("# Comparing in files.")
+    print("# Comparing in files.", file=outfile)
     for idx1, fn1 in enumerate(files):
         for idx2, fn2 in enumerate(files):
             if idx2 >= idx1:
@@ -72,7 +78,7 @@ if __name__ == '__main__':
     #print(resultmatrix)
 
 
-    print("# These files seem to have the same contents, but may differ in size:")
+    print("# These files seem to have the same contents, but may differ in size:", file=outfile)
 
     for idx1, fn1 in enumerate(files):
         for idx2, fn2 in enumerate(files):
@@ -81,16 +87,20 @@ if __name__ == '__main__':
 
             diffval = resultmatrix[idx1, idx2]
             if diffval < 10:
-                #print("{} / {} -> {}".format(fn1, fn2, diffval))
-                print("qiv -f {} / {} # -> {}".format(fn1, fn2, diffval))
+                #print("{} / {} -> {}".format(fn1, fn2, diffval), file=outfile)
+                print("qiv -f {} / {} # -> {}".format(fn1, fn2, diffval), file=outfile)
 
 
         
-    t4 = pc() # time after printing the results
 
-print("# t1 - t0", t1 - t0)
-print("# t2 - t1", t2 - t1)
-print("# t3 - t2", t3 - t2)
-print("# t4 - t3", t4 - t3)
-print("#")
-print("# t4 - t0", t4 - t3)
+    t4 = pc() # time after writing the results to the outfile
+
+print("# t1 - t0", t1 - t0, file=outfile)
+print("# t2 - t1", t2 - t1, file=outfile)
+print("# t3 - t2", t3 - t2, file=outfile)
+print("# t4 - t3", t4 - t3, file=outfile)
+print("#", file=outfile)
+print("# t4 - t0", t4 - t3, file=outfile)
+
+outfile.close()
+print("Result has been written to \"{}\"".format(outfilename))
