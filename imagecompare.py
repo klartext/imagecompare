@@ -71,7 +71,7 @@ if __name__ == '__main__':
             bw1 = filedata[fn1]
             bw2 = filedata[fn2]
 
-            diffval = sum(abs(bw1 - bw2)) / len(bw1)
+            diffval = np.sum(np.abs(bw1 - bw2)) / len(bw1)
             resultmatrix[idx1, idx2] = diffval
 
     t3 = pc() # time after calculating the diff-value
