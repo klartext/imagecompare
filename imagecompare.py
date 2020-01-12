@@ -88,7 +88,9 @@ if __name__ == '__main__':
         
     t4 = pc() # time after printing the results
 
-print("t1 - t0", t1 - t0)
-print("t2 - t1", t2 - t1)
-print("t3 - t2", t3 - t2)
-print("t4 - t3", t4 - t3)
+print("# t1 - t0", t1 - t0)
+print("# t2 - t1", t2 - t1)
+print("# t3 - t2", t3 - t2)
+print("# t4 - t3", t4 - t3)
+print("#")
+print("# t4 - t0", t4 - t3)
