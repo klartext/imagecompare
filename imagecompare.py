@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     outfilename = "view-results.bash"
     outfile = open(outfilename, "w")
-    print("# Reading in files.", file=outfile)
+    print("# Reading in files.", file=outfile, flush=True)
     filedata = {}
     for fn in files:
         filedata[fn] = fixedscalebwthumb(fn)
@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     t2 = pc() # time after creating the result-array
 
-    print("# Comparing in files.", file=outfile)
+    print("# Comparing in files.", file=outfile, flush=True)
     for idx1, fn1 in enumerate(files):
         for idx2, fn2 in enumerate(files):
             if idx2 >= idx1:
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     #print(resultmatrix)
 
 
-    print("# These files seem to have the same contents, but may differ in size:", file=outfile)
+    print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
 
     for idx1, fn1 in enumerate(files):
         for idx2, fn2 in enumerate(files):
@@ -87,8 +87,8 @@ if __name__ == '__main__':
 
             diffval = resultmatrix[idx1, idx2]
             if diffval < 10:
-                #print("{} / {} -> {}".format(fn1, fn2, diffval), file=outfile)
-                print("qiv -f {} / {} # -> {}".format(fn1, fn2, diffval), file=outfile)
+                #print("{} / {} -> {}".format(fn1, fn2, diffval), file=outfile, flush=True)
+                print("qiv -f {} / {} # -> {}".format(fn1, fn2, diffval), file=outfile, flush=True)
 
 
         
