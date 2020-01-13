@@ -132,6 +132,5 @@ print("# t4 - t3", t4 - t3, file=outfile)
 print("#", file=outfile)
 print("# t4 - t0", t4 - t0, file=outfile)
 
-print("prints:", t5-pc())
 outfile.close()
 print("Result has been written to \"{}\"".format(outfilename))
