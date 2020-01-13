@@ -115,7 +115,7 @@ if __name__ == '__main__':
                 continue # don't compare a file with itself; half matrix is sufficient
 
             diffval = resultmatrix[idx1, idx2]
-            if diffval < 10:
+            if diffval < 1.5:
                 #print("{} / {} -> {}".format(fn1, fn2, diffval), file=outfile, flush=True)
                 print("qiv -f {} / {} # -> {}".format(fn1, fn2, diffval), file=outfile, flush=True)
 
