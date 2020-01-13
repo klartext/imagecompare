@@ -81,16 +81,16 @@ if __name__ == '__main__':
     print("# Comparing {} files.".format(n), file=sys.stderr, flush=True)
     print("# Comparing {} files.".format(n), file=outfile, flush=True)
 
-    #len_of_array = len(filedata[0])
+    len_of_array = len(filedata[0])
     #aver_div = 1.0 / len_of_array
     for vert in range(1,len(files)):
         for hor in range(vert):
-            bw1 = filedata[vert]
-            bw2 = filedata[hor]
+            #bw1 = filedata[vert]
+            #bw2 = filedata[hor]
             #print("idx1/vert, idx2/hor: {} , {}".format(vert, hor))
 
-            diffval = np.average(np.abs(bw1 - bw2))
-            #diffval = np.sum(np.abs(filedata[fn1] - filedata[fn2])) / len(bw1)
+            #diffval = np.average(np.abs(bw1 - bw2))# dies ist langsamer!
+            diffval = np.sum(np.abs(filedata[vert] - filedata[hor])) / len_of_array
             resultmatrix[vert, hor] = diffval
 
     #t2_2 = pc() # time after creating the result-array
