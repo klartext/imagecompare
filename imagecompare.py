@@ -52,6 +52,7 @@ if __name__ == '__main__':
 
     outfilename = "view-results.bash"
     outfile = open(outfilename, "w")
+    print("# Reading in files.", file=sys.stderr, flush=True)
     print("# Reading in files.", file=outfile, flush=True)
     filedata = {}
     idx = 0
@@ -76,7 +77,8 @@ if __name__ == '__main__':
 
     t2 = pc() # time after creating the result-array
 
-    print("# Comparing files.", file=outfile, flush=True)
+    print("# Comparing {} files.".format(n), file=sys.stderr, flush=True)
+    print("# Comparing {} files.".format(n), file=outfile, flush=True)
 
     #len_of_array = len(filedata[0])
     #aver_div = 1.0 / len_of_array
