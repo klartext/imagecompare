@@ -53,9 +53,12 @@ if __name__ == '__main__':
     outfile = open(outfilename, "w")
     print("# Reading in files.", file=outfile, flush=True)
     filedata = {}
-    for fn in files:
+    for idx, fn in enumerate(files):
         filedata[fn] = fixedscalebwthumb(fn) # filedata berechnen
+        filedata[idx] = filedata[fn]
 
+
+    #print(filedata.keys())
     t1 = pc() # time after reading the files and creating the bw-imagedata of the thumbs
 
     n = len(files)
@@ -63,20 +66,42 @@ if __name__ == '__main__':
 
     t2 = pc() # time after creating the result-array
 
-    print("# Comparing in files.", file=outfile, flush=True)
+    print("# Comparing files.", file=outfile, flush=True)
+
+    #len_of_array = len(filedata[0])
+    #aver_div = 1.0 / len_of_array
+    len_files = len(files)
+    for vert in range(1,len_files):
+        for hor in range(vert):
+            bw1 = filedata[vert]
+            bw2 = filedata[hor]
+            #print("idx1/vert, idx2/hor: {} , {}".format(vert, hor))
+
+            diffval = np.average(np.abs(bw1 - bw2))
+            #diffval = np.sum(np.abs(filedata[fn1] - filedata[fn2])) / len(bw1)
+            resultmatrix[vert, hor] = diffval
+
+    #t2_2 = pc() # time after creating the result-array
+
+    """
     for idx1, fn1 in enumerate(files):
         for idx2, fn2 in enumerate(files):
             if idx2 >= idx1:
                 continue # compare only below the diagonal
             bw1 = filedata[fn1]
             bw2 = filedata[fn2]
+            #print("idx1, idx2: {} , {}".format(idx1, idx2))
 
             diffval = np.sum(np.abs(bw1 - bw2)) / len(bw1)
+            #diffval = np.sum(np.abs(filedata[fn1] - filedata[fn2])) / len(bw1)
             resultmatrix[idx1, idx2] = diffval
+    """
 
     t3 = pc() # time after calculating the diff-value
     #print(resultmatrix)
 
+    #print("# t2_2 - t2", t2_2 - t2, file=outfile)
+    print("# t3 - t2", t3 - t2, file=outfile)
 
     print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
 
@@ -95,6 +120,7 @@ if __name__ == '__main__':
 
     t4 = pc() # time after writing the results to the outfile
 
+t5 = pc()
 print("# t1 - t0", t1 - t0, file=outfile)
 print("# t2 - t1", t2 - t1, file=outfile)
 print("# t3 - t2", t3 - t2, file=outfile)
@@ -102,5 +128,6 @@ print("# t4 - t3", t4 - t3, file=outfile)
 print("#", file=outfile)
 print("# t4 - t0", t4 - t0, file=outfile)
 
+print("prints:", t5-pc())
 outfile.close()
 print("Result has been written to \"{}\"".format(outfilename))
