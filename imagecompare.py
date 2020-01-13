@@ -82,11 +82,8 @@ if __name__ == '__main__':
     print("# Comparing {} files.".format(n), file=outfile, flush=True)
 
     len_of_array = len(filedata[0])
-    #aver_div = 1.0 / len_of_array
     for vert in range(1,len(files)):
         for hor in range(vert):
-            #bw1 = filedata[vert]
-            #bw2 = filedata[hor]
             #print("idx1/vert, idx2/hor: {} , {}".format(vert, hor))
 
             #diffval = np.average(np.abs(bw1 - bw2))# dies ist langsamer!
@@ -134,12 +131,12 @@ if __name__ == '__main__':
     t4 = pc() # time after writing the results to the outfile
 
 t5 = pc()
-print("# t1 - t0", t1 - t0, file=outfile)
-print("# t2 - t1", t2 - t1, file=outfile)
-print("# t3 - t2", t3 - t2, file=outfile)
-print("# t4 - t3", t4 - t3, file=outfile)
+print("# Dateien einlesen: {:8.3f}".format(t1 - t0), file=outfile)
+#print("# t2 - t1", t2 - t1, file=outfile)
+print("# Berechnung        {:8.3f}".format(t3 - t2), file=outfile)
+print("# Ausgabe (Datei)   {:8.3f}".format(t4 - t3), file=outfile)
 print("#", file=outfile)
-print("# t4 - t0", t4 - t0, file=outfile)
+print("# GESAMTZEIT        {:8.3f}".format(t4 - t0), file=outfile)
 
 outfile.close()
 print("Result has been written to \"{}\"".format(outfilename))
