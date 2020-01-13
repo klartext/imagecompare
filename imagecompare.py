@@ -49,6 +49,7 @@ if __name__ == '__main__':
     files_argv = sys.argv[1:]
     files = []
 
+    print("# Try to compare {} files.".format(len(files_argv)), file=sys.stderr, flush=True)
 
     outfilename = "view-results.bash"
     outfile = open(outfilename, "w")
