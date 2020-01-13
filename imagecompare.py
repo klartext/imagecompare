@@ -46,20 +46,26 @@ if __name__ == '__main__':
 
     t0 = pc() # starting-time
 
-    files = sys.argv[1:]
+    files_argv = sys.argv[1:]
+    files = []
 
 
     outfilename = "view-results.bash"
     outfile = open(outfilename, "w")
     print("# Reading in files.", file=outfile, flush=True)
     filedata = {}
-    for idx, fn in enumerate(files):
+    idx = 0
+    for fn in files_argv:
         try:
-            filedata[fn] = fixedscalebwthumb(fn) # filedata berechnen
-            filedata[idx] = filedata[fn]
+            bwdata = fixedscalebwthumb(fn) # filedata berechnen
+            #print("idx: {}, fn: {}".format(idx,fn))
+            filedata[fn]  = bwdata # filedata berechnen
+            filedata[idx] = bwdata
+            files.append(fn) # akzeptierte Datei
+            idx = idx + 1
         except:
             print("ignoring file \"{}\"".format(fn), file=sys.stderr, flush=True)
-            files.remove(fn)
+
 
 
     #print(filedata.keys())
@@ -74,8 +80,7 @@ if __name__ == '__main__':
 
     #len_of_array = len(filedata[0])
     #aver_div = 1.0 / len_of_array
-    len_files = len(files)
-    for vert in range(1,len_files):
+    for vert in range(1,len(files)):
         for hor in range(vert):
             bw1 = filedata[vert]
             bw2 = filedata[hor]
