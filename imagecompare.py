@@ -117,7 +117,7 @@ if __name__ == '__main__':
             diffval = resultmatrix[idx1, idx2]
             if diffval < 1.5:
                 #print("{} / {} -> {}".format(fn1, fn2, diffval), file=outfile, flush=True)
-                print("qiv -f {} / {} # -> {}".format(fn1, fn2, diffval), file=outfile, flush=True)
+                print("qiv -f {} {} # -> {}".format(fn1, fn2, diffval), file=outfile, flush=True)
 
 
         
