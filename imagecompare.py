@@ -54,8 +54,12 @@ if __name__ == '__main__':
     print("# Reading in files.", file=outfile, flush=True)
     filedata = {}
     for idx, fn in enumerate(files):
-        filedata[fn] = fixedscalebwthumb(fn) # filedata berechnen
-        filedata[idx] = filedata[fn]
+        try:
+            filedata[fn] = fixedscalebwthumb(fn) # filedata berechnen
+            filedata[idx] = filedata[fn]
+        except:
+            print("ignoring file \"{}\"".format(fn), file=sys.stderr, flush=True)
+            files.remove(fn)
 
 
     #print(filedata.keys())
