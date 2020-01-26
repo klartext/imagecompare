@@ -83,6 +83,7 @@ if __name__ == '__main__':
 
     len_of_array = len(filedata[0])
     for vert in range(1,len(files)):
+        print("vert-count: {:4d} of {:4d}".format(vert, len(files)), flush=True)
         for hor in range(vert):
             #print("idx1/vert, idx2/hor: {} , {}".format(vert, hor))
 
