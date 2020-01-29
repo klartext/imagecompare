@@ -1,6 +1,8 @@
 #!/usr/bin/python
  
 import sys
+import os.path as path
+
 from time import perf_counter as pc
 
 from PIL import Image
@@ -37,6 +39,8 @@ def calc_imagediffcoeff( bwimg_1, bwimg_2 ):
     return sum(absdiff)/len(absdiff)
 
 
+def print_dot():
+    print(".", end='', flush = True)
 
 # =============================================================================
 # =============================================================================
@@ -47,7 +51,7 @@ if __name__ == '__main__':
     t0 = pc() # starting-time
 
     files_argv = sys.argv[1:]
-    files = []
+    files = [] # list of accepted files
 
     print("# Try to compare {} files.".format(len(files_argv)), file=sys.stderr, flush=True)
 
@@ -57,23 +61,35 @@ if __name__ == '__main__':
     print("# Reading in files.", file=outfile, flush=True)
     filedata = {}
     idx = 0
-    for fn in files_argv:
+    for fileidx, fn in enumerate(files_argv):
+        print_dot()
         try:
+            if path.islink(fn):
+                print("\nignoring symbolic link \"{}\" ({}. file from command line)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
+                continue
+
+            if path.isdir(fn):
+                print("\nignoring dir \"{}\" ({}. file from command line)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
+                continue
+
+
             bwdata = fixedscalebwthumb(fn) # filedata berechnen
-            #print("idx: {}, fn: {}".format(idx,fn))
-            filedata[fn]  = bwdata # filedata berechnen
+            #print("idx: {}/{}, fn: {}".format(idx, len(files_argv), fn), flush=True)
+            filedata[fn]  = bwdata
             filedata[idx] = bwdata
             files.append(fn) # akzeptierte Datei
             idx = idx + 1
         except:
-            print("ignoring file \"{}\"".format(fn), file=sys.stderr, flush=True)
+            print("\nignoring file \"{}\" ({}. file from command line)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
+
+    print("") # to have a newline after the dots.
+
+    num_of_used_files = idx
 
 
-
-    #print(filedata.keys())
     t1 = pc() # time after reading the files and creating the bw-imagedata of the thumbs
 
-    n = len(files)
+    n = num_of_used_files
     resultmatrix = np.zeros((n,n), 'f') # does sparse-matrix-Array make sense?!
 
     t2 = pc() # time after creating the result-array
@@ -81,15 +97,20 @@ if __name__ == '__main__':
     print("# Comparing {} files.".format(n), file=sys.stderr, flush=True)
     print("# Comparing {} files.".format(n), file=outfile, flush=True)
 
+    # Pairwise comparison of thumbs
+    # -----------------------------
     len_of_array = len(filedata[0])
-    for vert in range(1,len(files)):
-        print("vert-count: {:4d} of {:4d}".format(vert, len(files)), flush=True)
+    for vert in range(1,num_of_used_files):
+        #print("comparing: {} with the other files.".format(files[vert]))
+        print_dot()
         for hor in range(vert):
-            #print("idx1/vert, idx2/hor: {} , {}".format(vert, hor))
+            #print("comparing: {} with {}".format(files[vert], files[hor]))
 
             #diffval = np.average(np.abs(bw1 - bw2))# dies ist langsamer!
             diffval = np.sum(np.abs(filedata[vert] - filedata[hor])) / len_of_array
             resultmatrix[vert, hor] = diffval
+
+    print("")
 
     #t2_2 = pc() # time after creating the result-array
 
