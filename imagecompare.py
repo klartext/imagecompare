@@ -43,6 +43,11 @@ def calc_imagediffcoeff( bwimg_1, bwimg_2 ):
 def print_dot():
     print(".", end='', flush = True)
 
+def print_val_if_modulo(value, modulo, prepend):
+    if not value % modulo:
+        print("{} {}".format(prepend, value))
+
+
 # =============================================================================
 # =============================================================================
 # =============================================================================
@@ -64,6 +69,7 @@ if __name__ == '__main__':
     idx = 0
     for fileidx, fn in enumerate(files_argv):
         print_dot()
+        print_val_if_modulo(idx + 1, 100, "Read file number")
         try:
             if path.islink(fn):
                 print("\nignoring symbolic link \"{}\" ({}. file from command line)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
@@ -76,7 +82,7 @@ if __name__ == '__main__':
 
             bwdata = fixedscalebwthumb(fn) # filedata berechnen
             #print("idx: {}/{}, fn: {}".format(idx, len(files_argv), fn), flush=True)
-            filedata[fn]  = bwdata
+            #filedata[fn]  = bwdata
             filedata[idx] = bwdata
             files.append(fn) # akzeptierte Datei
             idx = idx + 1
@@ -103,6 +109,7 @@ if __name__ == '__main__':
     len_of_array = len(filedata[0])
     for vert in range(1,num_of_used_files):
         #print("comparing: {} with the other files.".format(files[vert]))
+        print_val_if_modulo(vert + 1, 100, "vertical Count:")
         print_dot()
         for hor in range(vert):
             #print("comparing: {} with {}".format(files[vert], files[hor]))
