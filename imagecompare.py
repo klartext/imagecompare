@@ -9,6 +9,7 @@ from PIL import Image
 import numpy as np
 import hashlib as hl
 
+import gc
 
 
 
@@ -123,6 +124,7 @@ if __name__ == '__main__':
     print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
 
     for idx1, fn1 in enumerate(files):
+        gc.collect()
         for idx2, fn2 in enumerate(files):
             if idx2 >= idx1:
                 continue # don't compare a file with itself; half matrix is sufficient
