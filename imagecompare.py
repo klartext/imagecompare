@@ -114,20 +114,6 @@ if __name__ == '__main__':
 
     #t2_2 = pc() # time after creating the result-array
 
-    """
-    for idx1, fn1 in enumerate(files):
-        for idx2, fn2 in enumerate(files):
-            if idx2 >= idx1:
-                continue # compare only below the diagonal
-            bw1 = filedata[fn1]
-            bw2 = filedata[fn2]
-            #print("idx1, idx2: {} , {}".format(idx1, idx2))
-
-            diffval = np.sum(np.abs(bw1 - bw2)) / len(bw1)
-            #diffval = np.sum(np.abs(filedata[fn1] - filedata[fn2])) / len(bw1)
-            resultmatrix[idx1, idx2] = diffval
-    """
-
     t3 = pc() # time after calculating the diff-value
     #print(resultmatrix)
 
