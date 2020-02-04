@@ -56,6 +56,11 @@ if __name__ == '__main__':
 
     t0 = pc() # starting-time
 
+    # check if filenames were given at all. Ifnot: message and exit
+    if len(sys.argv) < 2:
+        print("filenames as arguments needed!")
+        exit(1)
+
     files_argv = sys.argv[1:]
     files = [] # list of accepted files
 
