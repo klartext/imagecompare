@@ -125,6 +125,10 @@ if __name__ == '__main__':
             files.append(fn) # accepted file
             idx = idx + 1
 
+        except KeyboardInterrupt:
+            print("\nCtrl-C was issued. Exiting.")
+            exit(1)
+
         except:
             print("\nignoring file \"{}\" ({}. file from command line, could not be opened as image.)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
 
