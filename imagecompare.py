@@ -1,4 +1,22 @@
 #!/usr/bin/python
+#
+# vim: filetype=python
+
+"""
+This is "imagecompare", the tool to compare images,
+find out similar images.
+
+Working principle:
+  Compare b/w thumbs of the images, where the thumbs of all images have a
+  fixesd size.
+
+Copyright: Oliver Bandel
+Copyleft:  GNU GPL v3 or higher/later version
+
+Use this software at your own risk.
+"""
+
+# ===========================================================================
 
 """
     This tool aims to find out similar or equal image-files.
