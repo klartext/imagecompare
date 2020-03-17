@@ -95,7 +95,7 @@ if __name__ == '__main__':
         exit(1)
 
     files_argv = sys.argv[1:]
-    files = [] # list of accepted files
+    files = {} # list of accepted files
 
     print("# {} filenames given on command line.".format(len(files_argv)), file=sys.stderr, flush=True)
 
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
             bwdata = fixedscalebwthumb(fn) # calculate filedata
             filedata[idx] = bwdata
-            files.append(fn) # accepted file
+            files[idx] = (fn) # accepted file
             idx = idx + 1
 
         except KeyboardInterrupt:
@@ -138,13 +138,14 @@ if __name__ == '__main__':
 
     t1 = pc() # timer value after reading the files and creating the bw-imagedata of the thumbs
 
-    resultmatrix = np.zeros((filecount, filecount), 'f') # does sparse-matrix-Array make sense?!
+    #resultmatrix = np.zeros((filecount, filecount), 'f') # does sparse-matrix-Array make sense?!
 
     t2 = pc() # timer value after creating the result-array
 
     print("# Comparing {} files.".format(filecount), file=sys.stderr, flush=True)
     print("# Comparing {} files.".format(filecount), file=outfile, flush=True)
 
+    print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
     # Pairwise comparison of thumbs (1/2 * num^2 comparisons)
     # -------------------------------------------------------
     len_of_array = len(filedata[0]) # actual length of the thumbnail-array
@@ -154,7 +155,12 @@ if __name__ == '__main__':
         for hor in range(vert):
             #diffval = np.average(np.abs(bw1 - bw2))# dies ist langsamer!
             diffval = np.sum(np.abs(filedata[vert] - filedata[hor])) / len_of_array
-            resultmatrix[vert, hor] = diffval
+            #resultmatrix[vert, hor] = diffval
+
+            if diffval < 1.5: # hardcoded value very-similar images
+                print("qiv -f {} {} # -> {}".format(files[vert], files[hor], diffval), file=outfile)
+            elif diffval >= 1.5 and diffval < 10: # hard coded value similar images
+                print("#qiv -f {} {} # -> {}".format(files[vert], files[hor], diffval), file=outfile)
 
     print("")
 
@@ -162,22 +168,7 @@ if __name__ == '__main__':
 
     print("# t3 - t2", t3 - t2, file=outfile)
 
-    print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
-
-    # Writing the results: pairwise print similar files on one line with
-    # call of image-viewer 'qiv'
-    # ------------------------------------------------------------------
-    for idx1, fn1 in enumerate(files):
-        gc.collect() # is that necessary? performance might be tested again.
-        for idx2, fn2 in enumerate(files):
-            if idx2 >= idx1:
-                continue # don't compare a file with itself; half matrix is sufficient
-
-            diffval = resultmatrix[idx1, idx2]
-            if diffval < 1.5: # hardcoded value very-similar images
-                print("qiv -f {} {} # -> {}".format(fn1, fn2, diffval), file=outfile, flush=True)
-            elif diffval >= 1.5 and diffval < 10: # hard coded value similar images
-                print("#qiv -f {} {} # -> {}".format(fn1, fn2, diffval), file=outfile, flush=True)
+#   print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
 
     t4 = pc() # timer value after writing the results to the outfile
 
