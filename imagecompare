@@ -18,26 +18,65 @@
     This tool aims to find out similar or equal image-files.
     The basic idea has two parts:
         1) reducing the data of the comparison while being accurate enough
+           to ensure a working comparison
         2) comparing the files via the reduced data
 
     Solution to 1): comparing black-/white-thumbnails of the images,
     scaled down to a fixed rectangle shape.
-    Solution to 2): calculate the pixel-difference of the images, and take the average
-    of the absolute value of that difference, and compare that value with a
-    threshold.
+
+    Solution to 2): calculate the pixel-difference of the images, and take the
+    average of the absolute value of that difference, and compare that value
+    with a threshold.
     $ coeff = \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $
-    Thresholds:   1.5  for very similar / nearly equal images
+    Thresholds:    1.5 for very similar / nearly equal images
                   10.0 for similar files
 
-    Similar files will be printed into a file that can be called as shell-script,
-    which then calls the image-viewer qiv in fullscreen-mode.
-    The image viewer will be invoked for two files each.
-    Then deleting the files that can be deleted is done 'by hand'.
-    If a file has more than one file that is similar, they nevertheless
-    will be called pairwise. So, for already deleted files the viewer might
-    be called nevertheless. Don't become confused by that.
-    Have also in mind, that an image an it's thumbnail (or an image just scaled
+    Very similar images will be printed into a file that can be
+    called as shell-script, which then calls the image-viewer 'qiv' in
+    fullscreen-mode.
+    Similar files are also printed into that file, but with a shell-comment
+    symbol '#' before the command, so that these commands will not be executed,
+    if the comment-symbol is not removed before calling that file (use your
+    favourite text editor to remove the comment symbol).
+
+    The image viewer will be invoked once for a pair of similar image files.
+    Then deleting those files that can/should be deleted is done 'by hand',
+    which means: the decision is not taken over by the software.
+    The reason is: the interest which image to delete (or not delete any at all)
+    can be different and depending on user and situation.
+    For example:
+      - don't delete any of the similar files (e.g. just view the images)
+      - delete the thumbs and store the original images
+      - delete the bigger images and save the (big enough) smaller one / thumbs
+      - delete the similar image without some overlayed text (text annyoing)
+      - delete the similar image with some overlayed text (text informative)
+      - (...)
+    So the decision is up to the user.
+
+    If an image has more than one similar other image, they nevertheless
+    will be called pairwise.
+    It's planned to change this in the future, so that a set of similar
+    images are displayed all together. Ideas on how to achieve that are
+    already there, but it needs time to rethink and then implement them.
+    (It should also bring a huge performance boost.)
+
+    But for now, only pairwise similarity is available.
+    This means, that if some images of the image pairs that should be shown,
+    have already been deleted, the image viewer may show only one
+    image. (If both were deleted, the viewer will show an error message, but
+    the shell will invoke the viewer on the next pair of images.)
+
+    Don't become confused by that.
+
+    Have also in mind, that an image and it's thumbnail (or an image just scaled
     to different resolutions) will be regarded as similar images.
+    Also the order in which the files are shown can differ.
+    So, be aware of this, when you try to accustom the deletion of images
+    via automated patterns of your hand (e.g. always delete the second file)
+    to save time.
+    But qiv does not remove the files immediately.
+    The will be moved to the directory ./.qiv-trash and can be recovered
+    this way.
 """
  
 import sys
