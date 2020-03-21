@@ -34,12 +34,16 @@
     Very similar images will be printed into a file that can be
     called as shell-script, which then calls the image-viewer 'qiv' in
     fullscreen-mode.
-    Similar files are also printed into that file, but with a shell-comment
-    symbol '#' before the command, so that these commands will not be executed,
-    if the comment-symbol is not removed before calling that file (use your
-    favourite text editor to remove the comment symbol).
 
-    The image viewer will be invoked once for a pair of similar image files.
+    All files that are found to be similar are printed in one row.
+    So, for each chain of similar files, the image viewer will be
+    invoked once.
+
+    ?Similar files are also printed into that file, but with a shell-comment
+    ?symbol '#' before the command, so that these commands will not be executed,
+    ?if the comment-symbol is not removed before calling that file (use your
+    ?favourite text editor to remove the comment symbol).
+
     Then deleting those files that can/should be deleted is done 'by hand',
     which means: the decision is not taken over by the software.
     The reason is: the interest which image to delete (or not delete any at all)
@@ -53,28 +57,7 @@
       - (...)
     So the decision is up to the user.
 
-    If an image has more than one similar other image, they nevertheless
-    will be called pairwise.
-    It's planned to change this in the future, so that a set of similar
-    images are displayed all together. Ideas on how to achieve that are
-    already there, but it needs time to rethink and then implement them.
-    (It should also bring a huge performance boost.)
-
-    But for now, only pairwise similarity is available.
-    This means, that if some images of the image pairs that should be shown,
-    have already been deleted, the image viewer may show only one
-    image. (If both were deleted, the viewer will show an error message, but
-    the shell will invoke the viewer on the next pair of images.)
-
-    Don't become confused by that.
-
-    Have also in mind, that an image and it's thumbnail (or an image just scaled
-    to different resolutions) will be regarded as similar images.
-    Also the order in which the files are shown can differ.
-    So, be aware of this, when you try to accustom the deletion of images
-    via automated patterns of your hand (e.g. always delete the second file)
-    to save time.
-    But qiv does not remove the files immediately.
+    The image viewer qiv does not remove the files immediately.
     The will be moved to the directory ./.qiv-trash and can be recovered
     this way.
 """
@@ -134,6 +117,100 @@ def print_val_if_modulo(value, modulo, prepend):
         print("{} {}".format(prepend, value))
 
 
+
+
+class ImageThumb:
+    def __init__(self, filename):
+        self.filename = filename
+        self.bwthumb = fixedscalebwthumb(filename)
+
+    def __repr__(self):
+        return """ImageThumb("{}")""".format(self.filename)
+
+    def __sub__(self, this, other):
+        return self.bwthumb - other.bwthumb
+
+    def dist(this, that):
+        """
+        metric function (distance value)
+        """
+        diffval = np.sum(np.abs(this.bwthumb - that.bwthumb)) / len(this.bwthumb)
+        return diffval
+
+
+
+class DistanceChain:
+    def __init__(self, epsilon):
+        self.representant = None
+        self.chainset   = set()
+        self.epsilon    = epsilon
+
+
+    def insert(self, elem):
+        #print(" METHOD: DistanceChain.insert()")
+        # if chain empty, insert first element
+        if len(self.chainset) == 0:
+            self.representant = elem
+            self.chainset.add(self.representant)
+            return True
+
+        if ImageThumb.dist(self.representant, elem) >  self.epsilon * len(self.chainset):
+            return False
+
+        for ce in self.chainset:
+            if ImageThumb.dist(ce, elem) <= self.epsilon:
+                self.chainset.add(elem)
+                return True
+
+        return False
+
+
+    def card(self):
+        return len(self.chainset)
+
+    def getrepr(self):
+        return self.representant
+
+
+    def getchain(self):
+        return self.chainset | set(self.representant)
+
+    def print(self, outchannel=sys.stdout, viewerstring="qiv -f"):
+        res = ""
+        for thumb in self.chainset:
+            res = res + ' ' +  thumb.filename
+        res = viewerstring + " " + res
+        print(res, file=outchannel)
+
+
+
+def get_chainsets_from_thumblist(thumblist, epsilon):
+    chainset = []
+    for thumb in thumblist:
+
+        # no chain so far? then create one, append it to the list and pick new elem
+        if len(chainset) == 0:
+            dc = DistanceChain(epsilon)
+            dc.insert(thumb)
+            chainset.append(dc)
+            continue
+
+        inserted = False
+        for idx, chain in enumerate(chainset):
+            inserted = False
+            if chain.insert(thumb):
+                inserted = True
+                break
+
+        if not inserted:
+            dc = DistanceChain(epsilon)
+            dc.insert(thumb)
+            chainset.append(dc)
+            continue
+
+    return chainset
+
+
 # =============================================================================
 # =============================================================================
 # =============================================================================
@@ -159,7 +236,7 @@ if __name__ == '__main__':
     print("# Reading in files.", file=sys.stderr, flush=True)
     print("# Reading in files.", file=outfile, flush=True)
 
-    filedata = {}
+    thumblist = []
     idx = 0
     for fileidx, fn in enumerate(files_argv):
         print_dot()
@@ -173,10 +250,9 @@ if __name__ == '__main__':
                 print("\nignoring dir \"{}\" ({}. file from command line)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
                 continue
 
-            bwdata = fixedscalebwthumb(fn) # calculate filedata
-            filedata[idx] = bwdata
-            files[idx] = (fn) # accepted file
-            idx = idx + 1
+            thumblist.append(ImageThumb(fn))
+
+            idx = idx + 1 # index of sucessfully openbed image files
 
         except KeyboardInterrupt:
             print("\nCtrl-C was issued. Exiting.")
@@ -187,49 +263,29 @@ if __name__ == '__main__':
 
     print("") # to have a newline after the dots.
 
-    filecount = idx # number of files
-
     t1 = pc() # timer value after reading the files and creating the bw-imagedata of the thumbs
 
-    #resultmatrix = np.zeros((filecount, filecount), 'f') # does sparse-matrix-Array make sense?!
+    print("{} images could be opened and will now be compared.".format(len(thumblist)))
+    print("Please be patient, it may take a while.")
+    t2 = pc() # timer
+    chainset = get_chainsets_from_thumblist(thumblist, 1.5) # epsilon = 1.5 # hard-coded!!!
+    t3 = pc() # timer
 
-    t2 = pc() # timer value after creating the result-array
-
-    print("# Comparing {} files.".format(filecount), file=sys.stderr, flush=True)
-    print("# Comparing {} files.".format(filecount), file=outfile, flush=True)
-
-    print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
-    # Pairwise comparison of thumbs (1/2 * num^2 comparisons)
-    # -------------------------------------------------------
-    len_of_array = len(filedata[0]) # actual length of the thumbnail-array
-    for vert in range(1,filecount):
-        print_val_if_modulo(vert + 1, 100, " Comparing files with file number:")
-        print_dot()
-        for hor in range(vert):
-            #diffval = np.average(np.abs(bw1 - bw2))# dies ist langsamer!
-            diffval = np.sum(np.abs(filedata[vert] - filedata[hor])) / len_of_array
-            #resultmatrix[vert, hor] = diffval
-
-            if diffval < 1.5: # hardcoded value very-similar images
-                print("qiv -f {} {} # -> {}".format(files[vert], files[hor], diffval), file=outfile)
-            elif diffval >= 1.5 and diffval < 10: # hard coded value similar images
-                print("#qiv -f {} {} # -> {}".format(files[vert], files[hor], diffval), file=outfile)
-
-    print("")
-
-    t3 = pc() # timer value after calculating the diff-value
-
-    print("# t3 - t2", t3 - t2, file=outfile)
-
-#   print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
+    # print out the resulting chains
+    for idx, chain in enumerate(chainset):
+        if chain.card() > 1:
+            chain.print(outfile)
 
     t4 = pc() # timer value after writing the results to the outfile
 
-    print("# Dateien einlesen: {:8.3f}".format(t1 - t0), file=outfile)
-    print("# Berechnung        {:8.3f}".format(t3 - t2), file=outfile)
-    print("# Ausgabe (Datei)   {:8.3f}".format(t4 - t3), file=outfile)
+#   print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
+
+
+    print("# Reading images:   {:8.3f}".format(t1 - t0), file=outfile)
+    print("# Calculating:      {:8.3f}".format(t3 - t2), file=outfile)
+    print("# Output to file    {:8.3f}".format(t4 - t3), file=outfile)
     print("#", file=outfile)
-    print("# GESAMTZEIT        {:8.3f}".format(t4 - t0), file=outfile)
+    print("# TOTAL TIME        {:8.3f}".format(t4 - t0), file=outfile)
 
     outfile.close()
     print("Result has been written to \"{}\"".format(outfilename))

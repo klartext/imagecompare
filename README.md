@@ -8,6 +8,6 @@ No command line switches are available.
 
 For a description do at your shell prompt ($):
 
-    $ head -80 imagecompare | less
+    $ head -63 imagecompare | less
 
 
