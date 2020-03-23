@@ -70,8 +70,6 @@ from time import perf_counter as pc
 from PIL import Image
 import numpy as np
 
-import gc
-
 
 # Settings, hardcoded
 # -------------------
@@ -277,9 +275,6 @@ if __name__ == '__main__':
             chain.print(outfile)
 
     t4 = pc() # timer value after writing the results to the outfile
-
-#   print("# These files seem to have the same contents, but may differ in size:", file=outfile, flush=True)
-
 
     print("# Reading images:   {:8.3f}".format(t1 - t0), file=outfile)
     print("# Calculating:      {:8.3f}".format(t3 - t2), file=outfile)
