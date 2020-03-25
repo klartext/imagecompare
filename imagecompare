@@ -71,9 +71,10 @@ from PIL import Image
 import numpy as np
 
 
-# Settings, hardcoded
-# -------------------
+# Settings, hardcoded (possible candidates for settings via cli parameters)
+# -------------------------------------------------------------------------
 outfilename = "view-results.bash" # hardcode value: filename
+thumbmatch_epsilon = 1.5 # hardcoded value: thumbmatch_epsilon (max. dist. for similarity)
 
 
 #############
@@ -222,8 +223,7 @@ if __name__ == '__main__':
         print("filenames as arguments needed!")
         exit(1)
 
-    files_argv = sys.argv[1:]
-    files = {} # list of accepted files
+    files_argv = sys.argv[1:] # filenames from command line
 
     print("# {} filenames given on command line.".format(len(files_argv)), file=sys.stderr, flush=True)
 
@@ -259,15 +259,17 @@ if __name__ == '__main__':
         except:
             print("\nignoring file \"{}\" ({}. file from command line, could not be opened as image.)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
 
-    print("") # to have a newline after the dots.
-
     t1 = pc() # timer value after reading the files and creating the bw-imagedata of the thumbs
 
-    print("{} images could be opened and will now be compared.".format(len(thumblist)))
+    print("\n{} images could be opened and will now be compared.".format(len(thumblist)))
+
+
+    # Now do the calculations (similarity search)
+    # -------------------------------------------
     print("# {} images could be opened and will now be compared.".format(len(thumblist)), file=outfile, flush=True)
     print("Please be patient, it may take a while.")
     t2 = pc() # timer
-    chainset = get_chainsets_from_thumblist(thumblist, 1.5) # epsilon = 1.5 # hard-coded!!!
+    chainset = get_chainsets_from_thumblist(thumblist, thumbmatch_epsilon)
     t3 = pc() # timer
 
     # print out the resulting chains
