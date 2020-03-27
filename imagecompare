@@ -213,7 +213,7 @@ class DistanceChain:
 
     def getchain(self):
         """get whole chain - returns set of the elements"""
-        return self.chainset | set(self.representant)
+        return self.chainset
 
     def print(self, outchannel=sys.stdout, viewerstring="qiv -f"):
         """print the chain: print all element-thumbs' filenames"""
