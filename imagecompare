@@ -83,7 +83,8 @@ thumbmatch_epsilon = 1.5 # hardcoded value: thumbmatch_epsilon (max. dist. for s
 
 def fixedshapebwthumb(filename):
     """
-    Creates onedim. array of the b/w image data of image-file.
+    Creates one-dimensional array of the b/w image data of image-file.
+    Fixed shape is 100x100.
     """
     img = Image.open(filename)
 
@@ -117,8 +118,21 @@ def print_val_if_modulo(value, modulo, prepend):
 
 
 
+#############
+# CLASSES   #
+#############
 
 class ImageThumb:
+    """
+    For each image (given by 'filename') this class creates an object,
+    which contains the black/white thumbnail of that image.
+    The image data is stored in a numpy-vector (1-dim array) of length
+    n := thumbwidth * thumbheight.
+    Also a distance method is available, which calculates the distance
+    between two such thumbs.
+    The used distance function is
+      $ \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $.
+    """
     def __init__(self, filename):
         self.filename = filename
         self.bwthumb = fixedshapebwthumb(filename)
@@ -131,7 +145,15 @@ class ImageThumb:
 
     def dist(this, that):
         """
-        metric function (distance value)
+        Metric function to calculate the distance value.
+
+        Calculation: $ \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $.
+        This is sum-metrics divided by n, to get a handy value.
+        As Numpy does elementwise operations, no loop is needed for the
+        substraction.
+
+        Parameters: 'this' and 'that' are ImageThumb objects.
+        Result:     distance between 'this' and 'that' returned.
         """
         diffval = np.sum(np.abs(this.bwthumb - that.bwthumb)) / len(this.bwthumb)
         return diffval
@@ -139,42 +161,62 @@ class ImageThumb:
 
 
 class DistanceChain:
+    """
+    Class DistanceChain to collect those thumbs, which have a distance of
+    epsilon or less.
+    The thumbs not necessarily line up in a chain, rather they do line up
+    in a web. But the key point is, that if they would line up in a chain,
+    then the max. distance between two of the n thumbs inside the chain
+    would not be farther away than n * epsilon.
+    This follows from the triangle inequality for n points/objects/thumbs.
+    So only thumbs that have a lower distance than n * epsilon will be checked
+    at all on a possible membership.
+    Practically this means: for thumbs far away (farther away than n * epslion)
+    only (number_of_elements_in_the_chain - 1) comparisons are needed.
+    One comparison with the representant of the chain is needed anyway.
+    This also means: the more images can be collected together in a
+    DistanceChain, the faster this kind of comparison will be.
+    """
     def __init__(self, epsilon):
         self.representant = None
         self.chainset   = set()
         self.epsilon    = epsilon
 
 
-    def insert(self, elem):
-        #print(" METHOD: DistanceChain.insert()")
-        # if chain empty, insert first element
+    def insert(self, candidate):
+        # if chain is empty, insert first candidate as representant
         if len(self.chainset) == 0:
-            self.representant = elem
+            self.representant = candidate
             self.chainset.add(self.representant)
             return True
 
-        if ImageThumb.dist(self.representant, elem) >  self.epsilon * len(self.chainset):
+        # if 'candidate' thumb is too far away, don't incorporate it
+        if ImageThumb.dist(self.representant, candidate) >  self.epsilon * len(self.chainset):
             return False
 
+        # incorporate candidate if it is in the near of one of the chain members
         for ce in self.chainset:
-            if ImageThumb.dist(ce, elem) <= self.epsilon:
-                self.chainset.add(elem)
+            if ImageThumb.dist(ce, candidate) <= self.epsilon:
+                self.chainset.add(candidate)
                 return True
 
-        return False
+        return False # candidate not incorporated
 
 
     def card(self):
+        """cardinality of the distance chain"""
         return len(self.chainset)
 
     def getrepr(self):
+        """the representant of the distance chain"""
         return self.representant
 
-
     def getchain(self):
+        """get whole chain - returns set of the elements"""
         return self.chainset | set(self.representant)
 
     def print(self, outchannel=sys.stdout, viewerstring="qiv -f"):
+        """print the chain: print all element-thumbs' filenames"""
         res = ""
         for thumb in self.chainset:
             res = res + ' ' +  thumb.filename
@@ -184,16 +226,25 @@ class DistanceChain:
 
 
 def get_chainsets_from_thumblist(thumblist, epsilon):
+    """
+    Creation of a list of chainsets from the list of thumbs.
+    Either a thumb is incoroprated into an existing chain,
+    or a new chain for it will be created.
+    """
     chainset = []
     for thumb in thumblist:
 
-        # no chain so far? then create one, append it to the list and pick new elem
+        # no chain existing so far?
+        # then create one, append it to the list and pick new thumb
         if len(chainset) == 0:
             dc = DistanceChain(epsilon)
             dc.insert(thumb)
             chainset.append(dc)
             continue
 
+        # try to insert thumb into any existing distance chain.
+        # if successful, check next thumb.
+        # if not, create new chainset for that thumb and append it to the list.
         inserted = False
         for idx, chain in enumerate(chainset):
             inserted = False
@@ -201,6 +252,7 @@ def get_chainsets_from_thumblist(thumblist, epsilon):
                 inserted = True
                 break
 
+        # create new distance chain for the thumb and append chain to chainlist
         if not inserted:
             dc = DistanceChain(epsilon)
             dc.insert(thumb)
