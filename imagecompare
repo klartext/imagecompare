@@ -169,13 +169,11 @@ class DistanceChain:
     then the max. distance between two of the n thumbs inside the chain
     would not be farther away than n * epsilon.
     This follows from the triangle inequality for n points/objects/thumbs.
-    So only thumbs that have a lower distance than n * epsilon will be checked
+    So only thumbs that have a smaller distance than n * epsilon will be checked
     at all on a possible membership.
-    Practically this means: for thumbs far away (farther away than n * epslion)
-    only (number_of_elements_in_the_chain - 1) comparisons are needed.
-    One comparison with the representant of the chain is needed anyway.
-    This also means: the more images can be collected together in a
-    DistanceChain, the faster this kind of comparison will be.
+    Practically this means: for thumbs far away (farther away than n * epsilon)
+    no comparison of thumb-distances at all is necessary.
+    This saves number_of_elements_in_the_chain comparisons.
     """
     def __init__(self, epsilon):
         self.representant = None
