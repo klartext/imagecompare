@@ -81,7 +81,7 @@ thumbmatch_epsilon = 1.5 # hardcoded value: thumbmatch_epsilon (max. dist. for s
 # FUNCTIONS #
 #############
 
-def fixedscalebwthumb(filename):
+def fixedshapebwthumb(filename):
     """
     Creates onedim. array of the b/w image data of image-file.
     """
@@ -121,7 +121,7 @@ def print_val_if_modulo(value, modulo, prepend):
 class ImageThumb:
     def __init__(self, filename):
         self.filename = filename
-        self.bwthumb = fixedscalebwthumb(filename)
+        self.bwthumb = fixedshapebwthumb(filename)
 
     def __repr__(self):
         return """ImageThumb("{}")""".format(self.filename)
