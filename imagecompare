@@ -88,6 +88,8 @@ def fixedshapebwthumb(filename):
     """
     img = Image.open(filename)
 
+    imgsize = img.width * img.height
+
     thumb = img.resize([100,100], Image.LANCZOS) # hardcode value: fixed thumb-size
     bwthumb = thumb.convert('L')
 
@@ -95,7 +97,7 @@ def fixedshapebwthumb(filename):
 
     img.close()
 
-    return data
+    return data, imgsize
 
 
 def calc_imagediffcoeff( bwimg_1, bwimg_2 ):
@@ -135,13 +137,22 @@ class ImageThumb:
     """
     def __init__(self, filename):
         self.filename = filename
-        self.bwthumb = fixedshapebwthumb(filename)
+        self.bwthumb, self.size = fixedshapebwthumb(filename)
 
     def __repr__(self):
         return """ImageThumb("{}")""".format(self.filename)
 
     def __sub__(self, this, other):
         return self.bwthumb - other.bwthumb
+
+    def __lt__(self, other):
+        """
+        Comparing thumbnails by size of the original image.
+        """
+        if self.size - other.size < 0:
+            return True
+        else:
+            return False
 
     def dist(this, that):
         """
@@ -213,10 +224,10 @@ class DistanceChain:
         """get whole chain - returns set of the elements"""
         return self.chainset
 
-    def print(self, outchannel=sys.stdout, viewerstring="qiv -f"):
+    def print(self, outchannel=sys.stdout, viewerstring="qiv -f -D"):
         """print the chain: print all element-thumbs' filenames"""
         res = ""
-        for thumb in self.chainset:
+        for thumb in sorted(self.chainset, reverse=True):
             res = res + ' ' +  thumb.filename
         res = viewerstring + " " + res
         print(res, file=outchannel)
