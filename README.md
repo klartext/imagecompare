@@ -57,7 +57,7 @@ bash script.
 When calling the output file as a script from the shell prompt,
 the viewer shows the images that are detected to be similar (if there are some),
 with the first one shown being the largest one.
-After quitting **qiv** it may be called on the next set of similar images.
+After quitting **qiv** it may be called again by that bash script on the next set of similar images.
 
 Use 'space' to view the next image and 'd' to delete them.
 (They will be moved to .qiv-trash not deleted.)
@@ -69,13 +69,13 @@ Use 'space' to view the next image and 'd' to delete them.
 
 The program is invoked with the filenames as arguments:
 
-$ imagecompare \*.jpg \*.png
+    $ imagecompare \*.jpg \*.png
 
 Then the program reads the images and compares them,
 and finally writes the output file.
 This file then can be called as shell script:
 
-$ bash view-results.bash
+    $ bash view-results.bash
 
 Then the set of similar images can be viewed and possibly deleted by the user.
 
