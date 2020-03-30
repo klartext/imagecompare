@@ -48,8 +48,7 @@ as well as some additional information in form of bash comments.
 The files of each detected set are sorted by size before printed to the file,
 so that the largest file is mentioned first on each line (descending order of size).
 
-The default viewer command
-- and at the moment implemented fixed as the only one -
+The default viewer command - and at the moment implemented fixed as the only one -
 is the call to the imageviewer **qiv** in fullscreenmode
 and without sorting of the filenames.
 
