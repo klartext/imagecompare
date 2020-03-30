@@ -69,7 +69,7 @@ Use 'space' to view the next image and 'd' to delete them.
 
 The program is invoked with the filenames as arguments:
 
-    $ imagecompare \*.jpg \*.png
+    $ imagecompare *.jpg *.png
 
 Then the program reads the images and compares them,
 and finally writes the output file.
