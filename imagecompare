@@ -61,7 +61,7 @@ r"""
     The will be moved to the directory ./.qiv-trash and can be recovered
     this way.
 """
- 
+
 import sys
 import os.path as path
 
@@ -90,7 +90,7 @@ def fixedshapebwthumb(filename):
 
     imgsize = img.width * img.height
 
-    thumb = img.resize([100,100], Image.LANCZOS) # hardcode value: fixed thumb-size
+    thumb = img.resize([100, 100], Image.LANCZOS) # hardcode value: fixed thumb-size
     bwthumb = thumb.convert('L')
 
     data = np.array(bwthumb.getdata())
@@ -100,7 +100,7 @@ def fixedshapebwthumb(filename):
     return data, imgsize
 
 
-def calc_imagediffcoeff( bwimg_1, bwimg_2 ):
+def calc_imagediffcoeff(bwimg_1, bwimg_2):
     r"""
     The arguments bwimg_1 and bwimg_2 are numpy-arrays,
     repesenting the black-white/grayscale-images and must have the
@@ -113,7 +113,7 @@ def calc_imagediffcoeff( bwimg_1, bwimg_2 ):
 
 def print_dot():
     """print a dot without newline and flush the output"""
-    print(".", end='', flush = True)
+    print(".", end='', flush=True)
 
 def print_val_if_modulo(value, modulo, prepend):
     """print the value if value modulo 'modulo' and prepend text in 'prepend'"""
@@ -207,7 +207,7 @@ class DistanceChain:
             return True
 
         # if 'candidate' thumb is too far away, don't incorporate it
-        if dist(self.representant, candidate) >  self.epsilon * len(self.chainset):
+        if dist(self.representant, candidate) > self.epsilon * len(self.chainset):
             return False
 
         # incorporate candidate if it is in the near of one of the chain members
