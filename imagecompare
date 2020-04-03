@@ -14,7 +14,7 @@
 # Use this software at your own risk.
 # ===========================================================================
 
-"""
+r"""
     This tool aims to find out similar or equal image-files.
     The basic idea has two parts:
         1) reducing the data of the comparison while being accurate enough
@@ -73,8 +73,8 @@ import numpy as np
 
 # Settings, hardcoded (possible candidates for settings via cli parameters)
 # -------------------------------------------------------------------------
-outfilename = "view-results.bash" # hardcode value: filename
-thumbmatch_epsilon = 1.5 # hardcoded value: thumbmatch_epsilon (max. dist. for similarity)
+OUTFILENAME = "view-results.bash" # hardcode value: filename
+THUMBMATCH_EPSILON = 1.5 # hardcoded value: THUMBMATCH_EPSILON (max. dist. for similarity)
 
 
 #############
@@ -101,7 +101,7 @@ def fixedshapebwthumb(filename):
 
 
 def calc_imagediffcoeff( bwimg_1, bwimg_2 ):
-    """
+    r"""
     The arguments bwimg_1 and bwimg_2 are numpy-arrays,
     repesenting the black-white/grayscale-images and must have the
     same dimensions (same shape).
@@ -112,9 +112,11 @@ def calc_imagediffcoeff( bwimg_1, bwimg_2 ):
 
 
 def print_dot():
+    """print a dot without newline and flush the output"""
     print(".", end='', flush = True)
 
 def print_val_if_modulo(value, modulo, prepend):
+    """print the value if value modulo 'modulo' and prepend text in 'prepend'"""
     if not value % modulo:
         print("{} {}".format(prepend, value))
 
@@ -125,7 +127,7 @@ def print_val_if_modulo(value, modulo, prepend):
 #############
 
 class ImageThumb:
-    """
+    r"""
     For each image (given by 'filename') this class creates an object,
     which contains the black/white thumbnail of that image.
     The image data is stored in a numpy-vector (1-dim array) of length
@@ -142,7 +144,7 @@ class ImageThumb:
     def __repr__(self):
         return """ImageThumb("{}")""".format(self.filename)
 
-    def __sub__(self, this, other):
+    def __sub__(self, other):
         return self.bwthumb - other.bwthumb
 
     def __lt__(self, other):
@@ -154,21 +156,22 @@ class ImageThumb:
         else:
             return False
 
-    def dist(this, that):
-        """
-        Metric function to calculate the distance value.
 
-        Calculation: $ \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $.
-        This is sum-metrics divided by n, to get a handy value.
-        (Can also be seen as the mean of the pixelwise differences.)
-        As Numpy does elementwise operations, no loop is needed for the
-        substraction.
+def dist(this, that):
+    r"""
+    Metric function to calculate the distance value.
 
-        Parameters: 'this' and 'that' are ImageThumb objects.
-        Result:     distance between 'this' and 'that' returned.
-        """
-        diffval = np.sum(np.abs(this.bwthumb - that.bwthumb)) / len(this.bwthumb)
-        return diffval
+    Calculation: $ \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $.
+    This is sum-metrics divided by n, to get a handy value.
+    (Can also be seen as the mean of the pixelwise differences.)
+    As Numpy does elementwise operations, no loop is needed for the
+    substraction.
+
+    Parameters: 'this' and 'that' are ImageThumb objects.
+    Result:     distance between 'this' and 'that' returned.
+    """
+    diffval = np.sum(np.abs(this.bwthumb - that.bwthumb)) / len(this.bwthumb)
+    return diffval
 
 
 
@@ -194,6 +197,9 @@ class DistanceChain:
 
 
     def insert(self, candidate):
+        """
+        Inserting an element into the distance chain, if chain empty or element not too far away.
+        """
         # if chain is empty, insert first candidate as representant
         if len(self.chainset) == 0:
             self.representant = candidate
@@ -201,12 +207,12 @@ class DistanceChain:
             return True
 
         # if 'candidate' thumb is too far away, don't incorporate it
-        if ImageThumb.dist(self.representant, candidate) >  self.epsilon * len(self.chainset):
+        if dist(self.representant, candidate) >  self.epsilon * len(self.chainset):
             return False
 
         # incorporate candidate if it is in the near of one of the chain members
         for ce in self.chainset:
-            if ImageThumb.dist(ce, candidate) <= self.epsilon:
+            if dist(ce, candidate) <= self.epsilon:
                 self.chainset.add(candidate)
                 return True
 
@@ -283,13 +289,13 @@ if __name__ == '__main__':
     # check if filenames were given at all. Ifnot: message and exit
     if len(sys.argv) < 2:
         print("filenames as arguments needed!")
-        exit(1)
+        sys.exit(1)
 
     files_argv = sys.argv[1:] # filenames from command line
 
     print("# {} filenames given on command line.".format(len(files_argv)), file=sys.stderr, flush=True)
 
-    outfile = open(outfilename, "w")
+    outfile = open(OUTFILENAME, "w")
 
     # Now read the image-files and store the b/w-data of the their thumbnails
     # -----------------------------------------------------------------------
@@ -316,7 +322,7 @@ if __name__ == '__main__':
 
         except KeyboardInterrupt:
             print("\nCtrl-C was issued. Exiting.")
-            exit(1)
+            sys.exit(1)
 
         except:
             print("\nignoring file \"{}\" ({}. file from command line, could not be opened as image.)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
@@ -331,7 +337,7 @@ if __name__ == '__main__':
     print("# {} images could be opened and will now be compared.".format(len(thumblist)), file=outfile, flush=True)
     print("Please be patient, it may take a while.")
     t2 = pc() # timer
-    chainset = get_chainsets_from_thumblist(thumblist, thumbmatch_epsilon)
+    chainset = get_chainsets_from_thumblist(thumblist, THUMBMATCH_EPSILON)
     t3 = pc() # timer
 
     # print out the resulting chains
@@ -348,4 +354,4 @@ if __name__ == '__main__':
     print("# TOTAL TIME        {:8.3f}".format(t4 - t0), file=outfile)
 
     outfile.close()
-    print("Result has been written to \"{}\"".format(outfilename))
+    print("Result has been written to \"{}\"".format(OUTFILENAME))
