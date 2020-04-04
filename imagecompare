@@ -83,7 +83,8 @@ THUMBMATCH_EPSILON = 1.5 # hardcoded value: THUMBMATCH_EPSILON (max. dist. for s
 
 def fixedshapebwthumb(filename):
     """
-    Creates one-dimensional array of the b/w image data of image-file.
+    Create one-dimensional array of the b/w image data of image-file.
+
     Fixed shape is 100x100.
     """
     img = Image.open(filename)
@@ -91,7 +92,7 @@ def fixedshapebwthumb(filename):
     imgsize = img.width * img.height
 
     thumb = img.resize([100, 100], Image.LANCZOS) # hardcode value: fixed thumb-size
-    bwthumb = thumb.convert('L')
+    bwthumb = thumb.convert('L') # convert thumb to black/white
 
     data = np.array(bwthumb.getdata())
 
@@ -101,7 +102,8 @@ def fixedshapebwthumb(filename):
 
 
 def calc_imagediffcoeff(bwimg_1, bwimg_2):
-    r"""
+    r"""Calculate image difference coefficient.
+
     The arguments bwimg_1 and bwimg_2 are numpy-arrays,
     repesenting the black-white/grayscale-images and must have the
     same dimensions (same shape).
@@ -112,11 +114,11 @@ def calc_imagediffcoeff(bwimg_1, bwimg_2):
 
 
 def print_dot():
-    """print a dot without newline and flush the output"""
+    """Print a dot without newline and flush the output."""
     print(".", end='', flush=True)
 
 def print_val_if_modulo(value, modulo, prepend):
-    """print the value if value modulo 'modulo' and prepend text in 'prepend'"""
+    """Print the value if value modulo 'modulo' and prepend text in 'prepend'."""
     if not value % modulo:
         print("{} {}".format(prepend, value))
 
@@ -127,7 +129,8 @@ def print_val_if_modulo(value, modulo, prepend):
 #############
 
 class ImageThumb:
-    r"""
+    r"""Create an ImageThumb object.
+
     For each image (given by 'filename') this class creates an object,
     which contains the black/white thumbnail of that image.
     The image data is stored in a numpy-vector (1-dim array) of length
@@ -137,7 +140,9 @@ class ImageThumb:
     The used distance function is
       $ \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $.
     """
+
     def __init__(self, filename):
+        """Initialize ImageThumb object."""
         self.filename = filename
         self.bwthumb, self.size = fixedshapebwthumb(filename)
 
@@ -148,9 +153,7 @@ class ImageThumb:
         return self.bwthumb - other.bwthumb
 
     def __lt__(self, other):
-        """
-        Comparing thumbnails by size of the original image.
-        """
+        """Compare thumbnails by size of the original image."""
         if self.size - other.size < 0:
             return True
         else:
@@ -160,6 +163,12 @@ class ImageThumb:
 def dist(this, that):
     r"""
     Metric function to calculate the distance value.
+
+    Parameters:
+    this: one ImageThumb object
+    that: another ImageThumb object
+
+    Returnvalue: distance value (float)
 
     Calculation: $ \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $.
     This is sum-metrics divided by n, to get a handy value.
@@ -190,6 +199,7 @@ class DistanceChain:
     no comparison of thumb-distances at all is necessary.
     This saves number_of_elements_in_the_chain comparisons.
     """
+
     def __init__(self, epsilon):
         self.representant = None
         self.chainset   = set()
@@ -197,9 +207,7 @@ class DistanceChain:
 
 
     def insert(self, candidate):
-        """
-        Inserting an element into the distance chain, if chain empty or element not too far away.
-        """
+        """Insert an element into the distance chain, if chain empty or element not too far away."""
         # if chain is empty, insert first candidate as representant
         if len(self.chainset) == 0:
             self.representant = candidate
@@ -220,19 +228,19 @@ class DistanceChain:
 
 
     def card(self):
-        """cardinality of the distance chain"""
+        """Get cardinality of the distance chain."""
         return len(self.chainset)
 
     def getrepr(self):
-        """the representant of the distance chain"""
+        """Get the representant of the distance chain."""
         return self.representant
 
     def getchain(self):
-        """get whole chain - returns set of the elements"""
+        """Get whole chain - returns set of the elements."""
         return self.chainset
 
     def print(self, outchannel=sys.stdout, viewerstring="qiv -f -D"):
-        """print the chain: print all element-thumbs' filenames"""
+        """Print the chain: print all element-thumbs' filenames."""
         res = ""
         for thumb in sorted(self.chainset, reverse=True):
             res = res + ' ' +  thumb.filename
@@ -243,9 +251,16 @@ class DistanceChain:
 
 def get_chainsets_from_thumblist(thumblist, epsilon):
     """
-    Creation of a list of chainsets from the list of thumbs.
+    Create a list of chainsets from the list of thumbs.
+
+    Parameters:
+    thumblist: list of ImageThumb objects
+    epsilon:   max. distance between two objects to be thrown into the same distance chain
+
+    Returnvalue: set of chains
+
     Either a thumb is incoroprated into an existing chain,
-    or a new chain for it will be created.
+    or a new chain will be created for it.
     """
     chainset = []
     for thumb in thumblist:
@@ -340,7 +355,7 @@ if __name__ == '__main__':
     chainset = get_chainsets_from_thumblist(thumblist, THUMBMATCH_EPSILON)
     t3 = pc() # timer
 
-    # print out the resulting chains
+    # print out the resulting chains with more than one element
     for idx, chain in enumerate(chainset):
         if chain.card() > 1:
             chain.print(outfile)
