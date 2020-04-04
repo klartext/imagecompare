@@ -172,7 +172,7 @@ def dist(this, that):
 
     Calculation: $ \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $.
     This is sum-metrics divided by n, to get a handy value.
-    (Can also be seen as the mean of the pixelwise differences.)
+    (Can also be seen as the mean of the abs() of pixelwise differences.)
     As Numpy does elementwise operations, no loop is needed for the
     substraction.
 
