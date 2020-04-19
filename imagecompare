@@ -297,8 +297,8 @@ def get_chainsets_from_thumblist(thumblist, epsilon):
 # =============================================================================
 # =============================================================================
 
-if __name__ == '__main__':
 
+def main():
     t0 = pc() # starting timer value
 
     # check if filenames were given at all. Ifnot: message and exit
@@ -370,3 +370,8 @@ if __name__ == '__main__':
 
     outfile.close()
     print("Result has been written to \"{}\"".format(OUTFILENAME))
+
+
+
+if __name__ == '__main__':
+    main()
