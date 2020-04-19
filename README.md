@@ -82,14 +82,14 @@ Then the set of similar images can be viewed and possibly deleted by the user.
 
 ## Command line switches
 
-Currently no command line switches are available.
+When command line switch ***```--bare```*** or ***```-b```*** is given,
+only the lines with similar files are printed.
+No extra information and no viewer command will be written.
 
 Possible command line switch in the future:
 
 - select other output filename,
 - select other viewer command,
-- write no viewer command,
-- maybe not even write anything else than the pure sets of similar files.
 - parameter to select 'similarness' (threshold on what to see as similar)
 
 Stay tuned to get a newer version of this tool.
@@ -100,6 +100,6 @@ Stay tuned to get a newer version of this tool.
 For a more into details description, when you are in the directory that contains
 imagecompare, you can type at your shell prompt ($):
 
-    $ head -63 imagecompare | less
+    $ head -72 imagecompare | less
 
 

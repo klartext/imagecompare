@@ -31,18 +31,27 @@ r"""
     Thresholds:    1.5 for very similar / nearly equal images
                   10.0 for similar files
 
-    Very similar images will be printed into a file that can be
+
+    By default, names of similar images will be printed into a file that can be
     called as shell-script, which then calls the image-viewer 'qiv' in
     fullscreen-mode.
+    The reason is, that a human then can select (delete) files at will.
+    (Reason for that design decision are mentioned below.)
 
-    All files that are found to be similar are printed in one row.
+    If option --bare is used, only the bare results of the simlarity-search
+    will be output to that file.
+    This means: no image-viewer invocation and also no additional
+    information.
+    This option might make sense, if post processing is done by other programs.
+
+    Format of the result output:
+    All files that are found to be similar are printed in one row (line).
+
     So, for each chain of similar files, the image viewer will be
-    invoked once.
+    invoked once, if ```--bare``` is not used.
 
-    ?Similar files are also printed into that file, but with a shell-comment
-    ?symbol '#' before the command, so that these commands will not be executed,
-    ?if the comment-symbol is not removed before calling that file (use your
-    ?favourite text editor to remove the comment symbol).
+    By default, there will be additional information in the file, like for
+    example the number of files and the needed time for certain operations.
 
     Then deleting those files that can/should be deleted is done 'by hand',
     which means: the decision is not taken over by the software.
@@ -64,6 +73,7 @@ r"""
 
 import sys
 import os.path as path
+import argparse
 
 from time import perf_counter as pc
 
@@ -113,14 +123,14 @@ def calc_imagediffcoeff(bwimg_1, bwimg_2):
     return sum(absdiff)/len(absdiff)
 
 
-def print_dot():
+def print_dot(outfile=sys.stderr):
     """Print a dot without newline and flush the output."""
-    print(".", end='', flush=True)
+    print(".", end='', file=outfile, flush=True)
 
-def print_val_if_modulo(value, modulo, prepend):
+def print_val_if_modulo(value, modulo, prepend, outfile=sys.stderr):
     """Print the value if value modulo 'modulo' and prepend text in 'prepend'."""
     if not value % modulo:
-        print("{} {}".format(prepend, value))
+        print("{} {}".format(prepend, value), file=outfile)
 
 
 
@@ -204,6 +214,7 @@ class DistanceChain:
         self.representant = None
         self.chainset   = set()
         self.epsilon    = epsilon
+        self.similar    = None
 
 
     def insert(self, candidate):
@@ -239,13 +250,10 @@ class DistanceChain:
         """Get whole chain - returns set of the elements."""
         return self.chainset
 
-    def print(self, outchannel=sys.stdout, viewerstring="qiv -f -D"):
-        """Print the chain: print all element-thumbs' filenames."""
-        res = ""
-        for thumb in sorted(self.chainset, reverse=True):
-            res = res + ' ' +  thumb.filename
-        res = viewerstring + " " + res
-        print(res, file=outchannel)
+    def finish(self):
+        """Create the list of files of the chain -> self.similar"""
+        # extract filenames with sort-by-size
+        self.similar = [ thumb.filename for thumb in sorted(self.chainset, reverse=True) ]
 
 
 
@@ -293,33 +301,17 @@ def get_chainsets_from_thumblist(thumblist, epsilon):
     return chainset
 
 
-# =============================================================================
-# =============================================================================
-# =============================================================================
+def from_filelist_create_thumblist(list_of_filenames):
+    """
+    Select valid imagefiles from the filename-list; return list of thumb-objects.
 
-
-def main():
-    t0 = pc() # starting timer value
-
-    # check if filenames were given at all. Ifnot: message and exit
-    if len(sys.argv) < 2:
-        print("filenames as arguments needed!")
-        sys.exit(1)
-
-    files_argv = sys.argv[1:] # filenames from command line
-
-    print("# {} filenames given on command line.".format(len(files_argv)), file=sys.stderr, flush=True)
-
-    outfile = open(OUTFILENAME, "w")
-
-    # Now read the image-files and store the b/w-data of the their thumbnails
-    # -----------------------------------------------------------------------
-    print("# Reading in files.", file=sys.stderr, flush=True)
-    print("# Reading in files.", file=outfile, flush=True)
-
+    For files that can be opened as image-files, create thumbnail-objects and
+    return a list of these objects.
+    For files that can't be opened as imagefiles, print a warning to sys.stderr.
+    """
     thumblist = []
     idx = 0
-    for fileidx, fn in enumerate(files_argv):
+    for fileidx, fn in enumerate(list_of_filenames):
         print_dot()
         print_val_if_modulo(idx + 1, 100, "Read file number")
         try:
@@ -342,15 +334,42 @@ def main():
         except:
             print("\nignoring file \"{}\" ({}. file from command line, could not be opened as image.)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
 
+    return thumblist
+
+
+def print_to_outfile(filehandle, *args):
+    """Print all args to outfile, given by filehandle with flush"""
+    print(*args, file=filehandle, flush=True)
+
+# =============================================================================
+# =============================================================================
+# =============================================================================
+def main(filelist, outfilename=OUTFILENAME, bare=False, viewerstring="qiv -f -D"):
+    t0 = pc() # starting timer value
+
+    outfile = open(outfilename, "w")
+
+    print_to_outfile(sys.stderr, "# {} filenames given on command line.".format(len(filelist)))
+
+    # Now read the image-files and store the b/w-data of the their thumbnails
+    # -----------------------------------------------------------------------
+    print_to_outfile(sys.stderr, "# Reading in files.")
+    if not bare:
+        print_to_outfile(outfile, "# Reading in files.")
+
+    thumblist = from_filelist_create_thumblist(filelist) # reading image files
+
     t1 = pc() # timer value after reading the files and creating the bw-imagedata of the thumbs
 
-    print("\n{} images could be opened and will now be compared.".format(len(thumblist)))
 
+    # comment to user and outfile
+    print_to_outfile(sys.stderr, "Please be patient, it may take a while.")
+    print_to_outfile(sys.stderr, "\n{} images could be opened and will now be compared.".format(len(thumblist)))
+    if not bare:
+        print_to_outfile(outfile, "# {} images could be opened and will now be compared.".format(len(thumblist)))
 
     # Now do the calculations (similarity search)
     # -------------------------------------------
-    print("# {} images could be opened and will now be compared.".format(len(thumblist)), file=outfile, flush=True)
-    print("Please be patient, it may take a while.")
     t2 = pc() # timer
     chainset = get_chainsets_from_thumblist(thumblist, THUMBMATCH_EPSILON)
     t3 = pc() # timer
@@ -358,20 +377,50 @@ def main():
     # print out the resulting chains with more than one element
     for idx, chain in enumerate(chainset):
         if chain.card() > 1:
-            chain.print(outfile)
+            chain.finish()
+            res = ' '.join(chain.similar)
+
+            if viewerstring != "":
+                res = viewerstring + " " + res
+
+            print(res, file=outfile, flush=True)
 
     t4 = pc() # timer value after writing the results to the outfile
 
-    print("# Reading images:   {:8.3f}".format(t1 - t0), file=outfile)
-    print("# Calculating:      {:8.3f}".format(t3 - t2), file=outfile)
-    print("# Output to file    {:8.3f}".format(t4 - t3), file=outfile)
-    print("#", file=outfile)
-    print("# TOTAL TIME        {:8.3f}".format(t4 - t0), file=outfile)
+    if not bare:
+        print_to_outfile(outfile, "# Reading images:   {:8.3f}".format(t1 - t0))
+        print_to_outfile(outfile, "# Calculating:      {:8.3f}".format(t3 - t2))
+        print_to_outfile(outfile, "# Output to file    {:8.3f}".format(t4 - t3))
+        print_to_outfile(outfile, "#")
+        print_to_outfile(outfile, "# TOTAL TIME        {:8.3f}".format(t4 - t0))
+
+    print_to_outfile(sys.stderr, "Result has been written to \"{}\"".format(outfilename))
 
     outfile.close()
-    print("Result has been written to \"{}\"".format(OUTFILENAME))
 
 
 
 if __name__ == '__main__':
-    main()
+
+    # initiate the cli-args parser
+    # ----------------------------
+    PROGRAMINFO = "This program aims to find out similar or equal image-files."
+    parser = argparse.ArgumentParser(description = PROGRAMINFO)
+
+    parser.add_argument("--bare", "-b", action="store_true", help="print similar filenames only (no viewer, no additional infos) -> stdout")
+    parser.add_argument('filenames', metavar='imagefile', type=str, nargs='+', help='Image filenames')
+
+    args = parser.parse_args()
+
+    # check if filenames were given at all. Ifnot: message and exit
+    if len(args.filenames) < 1:
+        print("filenames as arguments needed!")
+        sys.exit(1)
+
+    if args.bare:
+        viewerstring = ""
+    else:
+        viewerstring = "qiv -f -D"
+    main(args.filenames, bare=args.bare, viewerstring=viewerstring)
+
+
