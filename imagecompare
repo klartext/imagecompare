@@ -344,7 +344,7 @@ def print_to_outfile(filehandle, *args):
 # =============================================================================
 # =============================================================================
 # =============================================================================
-def main(filelist, outfilename=OUTFILENAME, bare=False, viewerstring="qiv -f -D"):
+def main(filelist, outfilename=OUTFILENAME, bare=False, viewerstring="qiv -f -D", epsilon=THUMBMATCH_EPSILON):
     t0 = pc() # starting timer value
 
     outfile = open(outfilename, "w")
@@ -371,7 +371,7 @@ def main(filelist, outfilename=OUTFILENAME, bare=False, viewerstring="qiv -f -D"
     # Now do the calculations (similarity search)
     # -------------------------------------------
     t2 = pc() # timer
-    chainset = get_chainsets_from_thumblist(thumblist, THUMBMATCH_EPSILON)
+    chainset = get_chainsets_from_thumblist(thumblist, epsilon)
     t3 = pc() # timer
 
     # print out the resulting chains with more than one element
@@ -408,6 +408,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = PROGRAMINFO)
 
     parser.add_argument("--bare", "-b", action="store_true", help="print similar filenames only (no viewer, no additional infos) -> stdout")
+    parser.add_argument("--treshold", "-t", type=float, default=THUMBMATCH_EPSILON, help="threshold (float) for similarity: 1.5 (default) very similar, 10 roughly similar")
     parser.add_argument('filenames', metavar='imagefile', type=str, nargs='+', help='Image filenames')
 
     args = parser.parse_args()
@@ -421,6 +422,8 @@ if __name__ == '__main__':
         viewerstring = ""
     else:
         viewerstring = "qiv -f -D"
-    main(args.filenames, bare=args.bare, viewerstring=viewerstring)
+
+    # do the work
+    main(args.filenames, bare=args.bare, viewerstring=viewerstring, epsilon=abs(args.treshold))
 
 
