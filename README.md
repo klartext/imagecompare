@@ -82,15 +82,29 @@ Then the set of similar images can be viewed and possibly deleted by the user.
 
 ## Command line switches
 
+The switch ***```--help```*** or ***```-h```*** will print a help message,
+listing usage syntax and command line arguments.
+
 When command line switch ***```--bare```*** or ***```-b```*** is given,
 only the lines with similar files are printed.
 No extra information and no viewer command will be written.
+
+For selecting the treshold of the comparison of images,
+the command line argument ***```--treshold```*** or ***```-t```***
+is available. It is a float argument, and the default value is 1.5.
+
+Using a treshold of 1.5 means the images will be very similar.
+Sometimes a value up to 3.0 might make sense.
+These values make sense to detect images with / without some text overlayed as similar.
+
+With values of about 10.0 images may look similar, but will likely already differ in
+the overall contents (not just some overlayed text).
+
 
 Possible command line switch in the future:
 
 - select other output filename,
 - select other viewer command,
-- parameter to select 'similarness' (threshold on what to see as similar)
 
 Stay tuned to get a newer version of this tool.
 
