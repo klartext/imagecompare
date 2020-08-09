@@ -212,7 +212,7 @@ class DistanceChain:
     at all on a possible membership.
     Practically this means: for thumbs far away (farther away than n * epsilon)
     no comparison of thumb-distances at all is necessary.
-    This saves number_of_elements_in_the_chain comparisons.
+    This saves (number_of_elements_in_the_chain - 1) comparisons per candidate.
     """
 
     def __init__(self, epsilon):
