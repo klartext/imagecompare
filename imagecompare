@@ -162,6 +162,9 @@ class ImageThumb:
     def __sub__(self, other):
         return self.bwthumb - other.bwthumb
 
+    def __len__(self):
+        return len(self.bwthumb)
+
     def __lt__(self, other):
         """Compare thumbnails by size of the original image."""
         if self.size - other.size < 0:
@@ -189,7 +192,7 @@ def dist(this, that):
     Parameters: 'this' and 'that' are ImageThumb objects.
     Result:     distance between 'this' and 'that' returned.
     """
-    diffval = np.sum(np.abs(this.bwthumb - that.bwthumb)) / len(this.bwthumb)
+    diffval = np.sum(np.abs(this - that)) / len(this)
     return diffval
 
 
