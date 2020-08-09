@@ -169,6 +169,8 @@ class ImageThumb:
         """Compare thumbnails by size of the original image."""
         if self.size - other.size < 0:
             return True
+        elif self.size == other.size:
+            return self.filename >= other.filename
         else:
             return False
 
