@@ -80,6 +80,8 @@ from time import perf_counter as pc
 from PIL import Image
 import numpy as np
 
+from dis import dis
+
 
 # Settings, hardcoded (possible candidates for settings via cli parameters)
 # -------------------------------------------------------------------------
@@ -175,27 +177,28 @@ class ImageThumb:
             return False
 
 
-def dist(this, that):
-    r"""
-    Metric function to calculate the distance value.
+    @staticmethod
+    def dist(this, that):
+        r"""
+        Metric function to calculate the distance value.
 
-    Parameters:
-    this: one ImageThumb object
-    that: another ImageThumb object
+        Parameters:
+        this: one ImageThumb object
+        that: another ImageThumb object
 
-    Returnvalue: distance value (float)
+        Returnvalue: distance value (float)
 
-    Calculation: $ \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $.
-    This is sum-metrics divided by n, to get a handy value.
-    (Can also be seen as the mean of the abs() of pixelwise differences.)
-    As Numpy does elementwise operations, no loop is needed for the
-    substraction.
+        Calculation: $ \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $.
+        This is sum-metrics divided by n, to get a handy value.
+        (Can also be seen as the mean of the abs() of pixelwise differences.)
+        As Numpy does elementwise operations, no loop is needed for the
+        substraction.
 
-    Parameters: 'this' and 'that' are ImageThumb objects.
-    Result:     distance between 'this' and 'that' returned.
-    """
-    diffval = np.sum(np.abs(this - that)) / len(this)
-    return diffval
+        Parameters: 'this' and 'that' are ImageThumb objects.
+        Result:     distance between 'this' and 'that' returned.
+        """
+        diffval = np.sum(np.abs(this - that)) / len(this)
+        return diffval
 
 
 
@@ -213,6 +216,8 @@ class DistanceChain:
     Practically this means: for thumbs far away (farther away than n * epsilon)
     no comparison of thumb-distances at all is necessary.
     This saves (number_of_elements_in_the_chain - 1) comparisons per candidate.
+    The distance-function is picked from the candidate objects. This provides
+    inheritance of the distance-method from the objects in use.
     """
 
     def __init__(self, epsilon):
@@ -220,6 +225,7 @@ class DistanceChain:
         self.chainset   = set()
         self.epsilon    = epsilon
         self.similar    = None
+        self.distfunc   = None
 
 
     def insert(self, candidate):
@@ -228,15 +234,16 @@ class DistanceChain:
         if len(self.chainset) == 0:
             self.representant = candidate
             self.chainset.add(self.representant)
+            self.distfunc = self.representant.dist
             return True
 
         # if 'candidate' thumb is too far away, don't incorporate it
-        if dist(self.representant, candidate) > self.epsilon * len(self.chainset):
+        if self.distfunc(self.representant, candidate) > self.epsilon * len(self.chainset):
             return False
 
         # incorporate candidate if it is in the near of one of the chain members
         for ce in self.chainset:
-            if dist(ce, candidate) <= self.epsilon:
+            if self.distfunc(ce, candidate) <= self.epsilon:
                 self.chainset.add(candidate)
                 return True
 
