@@ -390,7 +390,10 @@ def main(filelist, outfilename=OUTFILENAME, bare=False, viewerstring="qiv -f -D"
     for idx, chain in enumerate(chainset):
         if chain.card() > 1:
             chain.finish()
-            res = ' '.join(chain.similar)
+            fn_quoted_spaces = [ filename.replace(" ", "\ ") for filename  in chain.similar ]
+            res = ' '.join(fn_quoted_spaces)
+
+
 
             if viewerstring != "":
                 res = viewerstring + " " + res
