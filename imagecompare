@@ -113,18 +113,6 @@ def fixedshapebwthumb(filename):
     return data, imgsize
 
 
-def calc_imagediffcoeff(bwimg_1, bwimg_2):
-    r"""Calculate image difference coefficient.
-
-    The arguments bwimg_1 and bwimg_2 are numpy-arrays,
-    repesenting the black-white/grayscale-images and must have the
-    same dimensions (same shape).
-    $ coeff = \frac{1}{n}\sum_{i=1}^n | x_i - y_i | $
-    """
-    absdiff = abs(bwimg_1 - bwimg_2)
-    return sum(absdiff)/len(absdiff)
-
-
 def print_dot(outfile=sys.stderr):
     """Print a dot without newline and flush the output."""
     print(".", end='', file=outfile, flush=True)
