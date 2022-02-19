@@ -152,6 +152,7 @@ class ImageThumb:
         return self.bwthumb - other.bwthumb
 
     def __len__(self):
+        """Size of the imagedata array of the thumbnail."""
         return len(self.bwthumb)
 
     def __lt__(self, other):
@@ -336,14 +337,15 @@ def from_filelist_create_thumblist(list_of_filenames):
     return thumblist
 
 
-def print_to_outfile(filehandle, *args):
-    """Print all args to outfile, given by filehandle with flush"""
-    print(*args, file=filehandle, flush=True)
+def print_to_outfile(filehandle, *arguments):
+    """Print all arguments to outfile, given by filehandle with flush"""
+    print(*arguments, file=filehandle, flush=True)
 
 # =============================================================================
 # =============================================================================
 # =============================================================================
 def main(filelist, outfilename=OUTFILENAME, bare=False, viewerstring="qiv -f -D", epsilon=THUMBMATCH_EPSILON):
+    """Main function. Read files, invokde the computations and write the results."""
     t0 = pc() # starting timer value
 
     outfile = open(outfilename, "w")
