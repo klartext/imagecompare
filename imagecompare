@@ -120,7 +120,7 @@ def print_dot(outfile=sys.stderr):
 def print_val_if_modulo(value, modulo, prepend, outfile=sys.stderr):
     """Print the value if value modulo 'modulo' and prepend text in 'prepend'."""
     if not value % modulo:
-        print("{} {}".format(prepend, value), file=outfile)
+        print(f"{prepend} {value}", file=outfile)
 
 
 
@@ -316,11 +316,11 @@ def from_filelist_create_thumblist(list_of_filenames):
         print_val_if_modulo(idx + 1, 100, "Read file number")
         try:
             if path.islink(fn):
-                print("\nignoring symbolic link \"{}\" ({}. file from command line)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
+                print(f"\nignoring symbolic link \"{fn}\" ({fileidx + 1}. file from command line)", file=sys.stderr, flush=True)
                 continue
 
             if path.isdir(fn):
-                print("\nignoring dir \"{}\" ({}. file from command line)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
+                print(f"\nignoring dir \"{fn}\" ({fileidx + 1}. file from command line)", file=sys.stderr, flush=True)
                 continue
 
             thumblist.append(ImageThumb(fn))
@@ -332,7 +332,7 @@ def from_filelist_create_thumblist(list_of_filenames):
             sys.exit(1)
 
         except:
-            print("\nignoring file \"{}\" ({}. file from command line, could not be opened as image.)".format(fn, fileidx + 1), file=sys.stderr, flush=True)
+            print(f"\nignoring file \"{fn}\" ({fileidx + 1}. file from command line, could not be opened as image.)", file=sys.stderr, flush=True)
 
     return thumblist
 
