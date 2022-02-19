@@ -77,6 +77,7 @@ import argparse
 
 from time import perf_counter as pc
 
+import PIL
 from PIL import Image
 import numpy as np
 
@@ -331,7 +332,7 @@ def from_filelist_create_thumblist(list_of_filenames):
             print("\nCtrl-C was issued. Exiting.")
             sys.exit(1)
 
-        except:
+        except PIL.UnidentifiedImageError:
             print(f"\nignoring file \"{fn}\" ({fileidx + 1}. file from command line, could not be opened as image.)", file=sys.stderr, flush=True)
 
     return thumblist
