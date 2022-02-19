@@ -285,7 +285,7 @@ def get_chainsets_from_thumblist(thumblist, epsilon):
         # if successful, check next thumb.
         # if not, create new chainset for that thumb and append it to the list.
         inserted = False
-        for idx, chain in enumerate(chainset):
+        for chain in chainset:
             inserted = False
             if chain.insert(thumb):
                 inserted = True
@@ -375,7 +375,7 @@ def main(filelist, outfilename=OUTFILENAME, bare=False, viewerstring="qiv -f -D"
     t3 = pc() # timer
 
     # print out the resulting chains with more than one element
-    for idx, chain in enumerate(chainset):
+    for chain in chainset:
         if chain.card() > 1:
             chain.finish()
             fn_quoted_spaces = [ filename.replace(" ", r"\ ") for filename  in chain.similar ]
