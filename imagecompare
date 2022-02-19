@@ -81,8 +81,6 @@ import PIL
 from PIL import Image
 import numpy as np
 
-from dis import dis
-
 
 # Settings, hardcoded (possible candidates for settings via cli parameters)
 # -------------------------------------------------------------------------
