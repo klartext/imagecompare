@@ -102,7 +102,7 @@ def fixedshapebwthumb(filename):
 
     imgsize = img.width * img.height
 
-    thumb = img.resize([100, 100], Image.LANCZOS) # hardcode value: fixed thumb-size
+    thumb = img.resize([100, 100], Image.Resampling.LANCZOS) # hardcode value: fixed thumb-size
     bwthumb = thumb.convert('L') # convert thumb to black/white
 
     data = np.array(bwthumb.getdata())
